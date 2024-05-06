@@ -1,4 +1,4 @@
-package com.example.models;
+package com.example.foodOrder.models;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -13,6 +13,7 @@ import java.util.Set;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Entity
 @Table(name = "user")
 public class User {
     @Id

@@ -1,4 +1,4 @@
-package com.example.models;
+package com.example.foodOrder.models;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

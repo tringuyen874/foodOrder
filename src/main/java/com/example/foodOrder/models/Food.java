@@ -1,4 +1,4 @@
-package com.example.models;
+package com.example.foodOrder.models;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -11,11 +11,14 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "category")
-public class Category {
+@Table(name = "food")
+public class Food {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
-    private Integer totalTypes;
+    private Double price;
+    private Integer total;
+    private Integer remaining;
+
 }
