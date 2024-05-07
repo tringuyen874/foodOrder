@@ -13,12 +13,12 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 public class DefaultSecurityConfig {
 
-//    @Bean
-//    public SecurityFilterChain defaultFilterChain(HttpSecurity http) throws Exception {
-//        http.authorizeHttpRequests(request -> request.anyRequest().authenticated())
-//                .formLogin(Customizer.withDefaults());
-//        return http.build();
-//    }
+    @Bean
+    public SecurityFilterChain defaultFilterChain(HttpSecurity http) throws Exception {
+        http.authorizeHttpRequests(request -> request.anyRequest().authenticated())
+                .formLogin(Customizer.withDefaults());
+        return http.build();
+    }
 
     @Bean
     public PasswordEncoder bcryptPasswordEncoder() {

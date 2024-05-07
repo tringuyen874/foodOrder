@@ -9,16 +9,20 @@ import com.nimbusds.jose.proc.SecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
+import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.server.authorization.OAuth2TokenType;
 import org.springframework.security.oauth2.server.authorization.client.InMemoryRegisteredClientRepository;
@@ -44,7 +48,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Configuration
-
+@ComponentScan
 public class AuthorizationServerConfig {
 
     @Autowired
@@ -61,7 +65,7 @@ public class AuthorizationServerConfig {
 
     @Value("${providerUrl}")
     private String providerUrl;
-
+//
     @Autowired
     private PasswordEncoder passwordEncoder;
 
@@ -69,8 +73,9 @@ public class AuthorizationServerConfig {
     @Order(Ordered.HIGHEST_PRECEDENCE)
     public SecurityFilterChain authSecurityFilterChain(HttpSecurity http) throws Exception {
         OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(http);
-        http.userDetailsService(userDetailsService).formLogin(Customizer.withDefaults());
-        return http.build();
+        http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED));
+
+        return http.userDetailsService(userDetailsService).formLogin(Customizer.withDefaults()).build();
     }
 
     @Bean
@@ -112,12 +117,14 @@ public class AuthorizationServerConfig {
         RegisteredClient registeredClient = RegisteredClient.withId("foodservice")
                 .clientId("foodserviceapp")
                 .clientSecret(passwordEncoder.encode("foodservice"))
+                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
 //                .clientSettings(clientSettings -> clientSettings.requireUserConsent(true))
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                 .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
-                .redirectUri("http://localhost:8080/authorized")
-                .scope("read")
-                .scope("write")
+                .redirectUri("https://oidcdebugger.com/debug")
+                .scope("read").scope("write")
+                .tokenSettings(tokenSettings())
+
                 .build();
         return new InMemoryRegisteredClientRepository(registeredClient);
     }
@@ -129,16 +136,15 @@ public class AuthorizationServerConfig {
     @Bean
     public OAuth2TokenCustomizer<JwtEncodingContext> jwtCustomizer() {
 
-        return new OAuth2TokenCustomizer<JwtEncodingContext>() {
-            @Override
-            public void customize(JwtEncodingContext context) {
-                if (context.getTokenType().equals(OAuth2TokenType.ACCESS_TOKEN)) {
-                    Authentication principal = context.getPrincipal();
-                    Set<String> authorities = principal.getAuthorities().stream()
-                            .map(GrantedAuthority::getAuthority).collect(Collectors.toSet());
-                    context.getClaims().claim("roles", authorities);
-                }
+        return context -> {
+            if(context.getTokenType().equals(OAuth2TokenType.ACCESS_TOKEN)) {
+                Authentication principal = context.getPrincipal();
+                Set<String> authorities = principal.getAuthorities().stream()
+                        .map(GrantedAuthority::getAuthority)
+                        .collect(Collectors.toSet());
+                context.getClaims().claim("roles", authorities);
             }
+
         };
     }
 

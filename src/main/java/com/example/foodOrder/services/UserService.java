@@ -30,12 +30,12 @@ public class UserService {
         Role userRole = new Role();
         userRole.setName("USER");
         userRole.setId(2L);
-        Role adminRole = new Role();
-        adminRole.setName("ADMIN");
-        adminRole.setId(1L);
+//        Role adminRole = new Role();
+//        adminRole.setName("ADMIN");
+//        adminRole.setId(1L);
 
         userRoles.add(userRole);
-        userRoles.add(adminRole);
+//        userRoles.add(adminRole);
         user.setRoles(userRoles);
         return userRepo.save(user);
     }

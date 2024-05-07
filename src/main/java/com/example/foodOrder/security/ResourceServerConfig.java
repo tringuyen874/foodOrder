@@ -25,11 +25,11 @@ public class ResourceServerConfig {
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.oauth2ResourceServer(oath2 -> oath2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())));
-        http.authorizeHttpRequests(requests -> requests.requestMatchers(HttpMethod.GET,"/orderapi/orders/{code:^[a-z]*$}")
+        http.authorizeHttpRequests(requests -> requests.requestMatchers(HttpMethod.GET,"/foodapi/foods/{name:^[a-zA-Z]*$}")
                 .hasAnyRole("USER","ADMIN")
-                .requestMatchers(HttpMethod.POST, "/orderapi/orders").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.POST,"/userapi/user").permitAll()
-                .requestMatchers(HttpMethod.GET, "/userapi/user/{username:^[a-z]*$}").permitAll()
+                .requestMatchers(HttpMethod.POST, "/foodapi/foods").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.POST,"/userapi/user").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.GET, "/userapi/user/{username:^[a-z0-9]*$}").hasRole("ADMIN")
                 .anyRequest().authenticated());
         http.csrf(csrf -> csrf.disable());
         return http.build();
